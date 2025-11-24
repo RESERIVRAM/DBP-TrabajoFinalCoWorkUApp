@@ -9,12 +9,12 @@ import java.util.Date
 class ProjectRepositoryFake {
     private val projects = mutableListOf(
         Project(
-            id = "p1",
+            id = 1,
             name = "CoWorkU App",
             description = "Desarrollo de la app móvil para la plataforma CoWorkU.",
             area = "Desarrollo Móvil",
             status = "Buscando miembros",
-            createdDate = Date(),
+            createdDate = "2025-11-24T10:00:00",
             requiredSkills = listOf(Skill("Kotlin", "Avanzado"), Skill("Jetpack Compose", "Intermedio")),
             members = listOf(
                 ProjectMember(User("1", "Renato Riva", "renato.riva@example.com", "Ingeniería de Software", emptyList()), "Líder")
@@ -27,7 +27,7 @@ class ProjectRepositoryFake {
         return projects
     }
 
-    fun getProject(id: String): Project? {
+    fun getProject(id: Int): Project? {
         return projects.find { it.id == id }
     }
 }

@@ -3,6 +3,7 @@ package com.example.coworku.ui.projects
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.coworku.data.repository.NetworkProjectRepository
 import com.example.coworku.data.repository.fake.ProjectRepositoryFake
 import com.example.coworku.domain.model.Project
 import kotlinx.coroutines.delay
@@ -22,18 +23,20 @@ class ProjectDetailViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
     val uiState: StateFlow<ProjectDetailUiState> = _uiState
 
     private val projectId: String = savedStateHandle.get<String>("projectId")!!
-    private val projectRepository = ProjectRepositoryFake()
+    private val projectRepository = NetworkProjectRepository()
 
     init {
         fetchProjectDetails()
     }
+
+    private val projectIdString: String = savedStateHandle.get<String>("projectId") ?: "0"
 
     fun fetchProjectDetails() {
         viewModelScope.launch {
             _uiState.value = ProjectDetailUiState(isLoading = true)
             delay(1000) // Simulate network delay
             try {
-                val project = projectRepository.getProject(projectId)
+                val project = projectRepository.getProject(projectIdString.toInt())
                 _uiState.value = ProjectDetailUiState(project = project)
             } catch (e: Exception) {
                 _uiState.value = ProjectDetailUiState(errorMessage = "Error al cargar el proyecto")

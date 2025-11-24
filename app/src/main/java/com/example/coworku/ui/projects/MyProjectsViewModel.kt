@@ -3,6 +3,7 @@ package com.example.coworku.ui.projects
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.coworku.data.repository.fake.ProjectRepositoryFake
+import com.example.coworku.data.repository.NetworkProjectRepository
 import com.example.coworku.domain.model.Project
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,8 @@ class MyProjectsViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(MyProjectsUiState())
     val uiState: StateFlow<MyProjectsUiState> = _uiState
 
-    private val projectRepository = ProjectRepositoryFake()
+    // private val projectRepository = ProjectRepositoryFake()
+    private val projectRepository = NetworkProjectRepository()
 
     init {
         fetchMyProjects()

@@ -56,8 +56,9 @@ fun LandingScreen(navController: NavController) {
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
+
             Button(
-                onClick = { /* TODO: Navigate to public project list */ },
+                onClick = { navController.navigate("home") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent
@@ -78,9 +79,11 @@ fun LandingScreen(navController: NavController) {
                     Text("Explorar Proyectos", color = Color.White)
                 }
             }
+
             Spacer(modifier = Modifier.height(16.dp))
+
             OutlinedButton(
-                onClick = { /* TODO: Navigate to about screen */ },
+                onClick = { navController.navigate("register") }, // <--- LLEVA AL REGISTRO
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Cómo iniciar")
