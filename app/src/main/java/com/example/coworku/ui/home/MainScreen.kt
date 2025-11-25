@@ -11,10 +11,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.PersonOutline
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material.icons.rounded.Favorite
+import androidx.compose.material.icons.rounded.Forum
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Work
@@ -37,12 +39,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.coworku.ui.auth.AuthViewModel
+import com.example.coworku.ui.community.CommunityHomeScreen
 import com.example.coworku.ui.profile.ProfileScreen
 import com.example.coworku.ui.projects.MyProjectsScreen
 import com.example.coworku.ui.projects.ProjectsListScreen
 import com.example.coworku.ui.projects.SavedProjectsScreen
 
-// Data class for Bottom Navigation items with both selected and unselected icons
 sealed class BottomNavItem(
     val route: String,
     val label: String,
@@ -51,12 +54,13 @@ sealed class BottomNavItem(
 ) {
     object Explore : BottomNavItem("explore", "Explorar", Icons.Rounded.Search, Icons.Default.Search)
     object MyProjects : BottomNavItem("my_projects", "Mis Proyectos", Icons.Rounded.Work, Icons.Default.WorkOutline)
+    object Community : BottomNavItem("community", "Comunidad", Icons.Rounded.Forum, Icons.Default.Forum)
     object Saved : BottomNavItem("saved", "Guardados", Icons.Rounded.Favorite, Icons.Default.FavoriteBorder)
     object Profile : BottomNavItem("profile", "Perfil", Icons.Rounded.Person, Icons.Default.PersonOutline)
 }
 
 @Composable
-fun MainScreen(mainNavController: NavController) {
+fun MainScreen(mainNavController: NavController, authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     Scaffold(
         bottomBar = { BottomBar(navController = navController) }
@@ -64,6 +68,7 @@ fun MainScreen(mainNavController: NavController) {
         MainNavigationHost(
             navController = navController,
             mainNavController = mainNavController,
+            authViewModel = authViewModel,
             modifier = Modifier.padding(padding)
         )
     }
@@ -74,6 +79,7 @@ fun BottomBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.Explore,
         BottomNavItem.MyProjects,
+        BottomNavItem.Community,
         BottomNavItem.Saved,
         BottomNavItem.Profile
     )
@@ -89,7 +95,6 @@ fun BottomBar(navController: NavHostController) {
             NavigationBarItem(
                 label = { Text(screen.label, style = MaterialTheme.typography.labelMedium) },
                 icon = {
-                    // Animate between selected and unselected icons
                     AnimatedContent(
                         targetState = isSelected,
                         transitionSpec = {
@@ -129,12 +134,22 @@ fun BottomBar(navController: NavHostController) {
 fun MainNavigationHost(
     navController: NavHostController,
     mainNavController: NavController,
+    authViewModel: AuthViewModel,
     modifier: Modifier
 ) {
     NavHost(navController, startDestination = BottomNavItem.Explore.route, modifier = modifier) {
         composable(BottomNavItem.Explore.route) { ProjectsListScreen(navController = mainNavController) }
         composable(BottomNavItem.MyProjects.route) { MyProjectsScreen(navController = mainNavController) }
+        composable(BottomNavItem.Community.route) {
+            CommunityHomeScreen(
+                onCategoryClick = { categoryId -> mainNavController.navigate("threadList/$categoryId") },
+                onThreadClick = { threadId -> mainNavController.navigate("threadDetail/$threadId") },
+                onNewsClick = { newsId -> mainNavController.navigate("newsDetail/$newsId") },
+                onCreateThreadClick = { mainNavController.navigate("createThread") },
+                onGoToHelpCenter = { mainNavController.navigate("faq") }
+            )
+        }
         composable(BottomNavItem.Saved.route) { SavedProjectsScreen(navController = mainNavController) }
-        composable(BottomNavItem.Profile.route) { ProfileScreen(navController = mainNavController) }
+        composable(BottomNavItem.Profile.route) { ProfileScreen(navController = mainNavController, authViewModel = authViewModel) }
     }
 }

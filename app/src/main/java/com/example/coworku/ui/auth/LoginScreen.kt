@@ -2,25 +2,20 @@ package com.example.coworku.ui.auth
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.example.coworku.ui.theme.CoWorkUTheme
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, authViewModel: AuthViewModel) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    val loginViewModel: LoginViewModel = viewModel()
+    val uiState by loginViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -35,33 +30,50 @@ fun LoginScreen(navController: NavController) {
             value = email,
             onValueChange = { email = it },
             label = { Text("Correo electrónico") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = uiState.errorMessage != null
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = { password = it }, // Corrected this line
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = uiState.errorMessage != null
         )
-        Spacer(modifier = Modifier.height(32.dp))
-        Button(
-            onClick = { /* TODO: Implement login logic */ navController.navigate("home") },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Iniciar sesión")
+
+        uiState.errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        if (uiState.isLoading) {
+            CircularProgressIndicator()
+        } else {
+            Button(
+                onClick = { loginViewModel.loginUser(email, password) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Iniciar sesión")
+            }
+        }
+
         TextButton(onClick = { navController.navigate("register") }) {
             Text("¿No tienes cuenta? Regístrate")
         }
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    CoWorkUTheme {
-        LoginScreen(rememberNavController())
+        // This effect will run when the login is successful
+        LaunchedEffect(uiState.loggedInUser) {
+            uiState.loggedInUser?.let { user ->
+                authViewModel.login(user)
+                navController.navigate("home") {
+                    // Clear back stack
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                }
+            }
+        }
     }
 }

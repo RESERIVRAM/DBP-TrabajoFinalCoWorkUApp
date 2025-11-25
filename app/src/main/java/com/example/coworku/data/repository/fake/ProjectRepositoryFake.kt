@@ -17,7 +17,18 @@ class ProjectRepositoryFake {
             createdDate = "2025-11-24T10:00:00",
             requiredSkills = listOf(Skill("Kotlin", "Avanzado"), Skill("Jetpack Compose", "Intermedio")),
             members = listOf(
-                ProjectMember(User("1", "Renato Riva", "renato.riva@example.com", "Ingeniería de Software", emptyList()), "Líder")
+                ProjectMember(
+                    User(
+                        id = "1",
+                        name = "Renato Riva",
+                        email = "renato.riva@example.com",
+                        passwordHash = "password123", // Corrected: Added password hash
+                        career = "Ingeniería de Software",
+                        skills = listOf(
+                            Skill("Kotlin", "Avanzado"),
+                            Skill("Jetpack Compose", "Intermedio")
+                        )
+                    ), "Líder")
             ),
             rolesAvailable = listOf("Desarrollador", "Diseñador")
         )

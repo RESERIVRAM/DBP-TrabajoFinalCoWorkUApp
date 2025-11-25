@@ -14,59 +14,58 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.coworku.ui.auth.AuthViewModel
 
 @Composable
-fun ProfileScreen(navController: NavController, viewModel: ProfileViewModel = viewModel()) {
-    val uiState by viewModel.uiState.collectAsState()
+fun ProfileScreen(navController: NavController, authViewModel: AuthViewModel) {
+    val currentUser by authViewModel.currentUser.collectAsState()
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        when {
-            uiState.isLoading -> CircularProgressIndicator()
-            uiState.errorMessage != null -> Text(uiState.errorMessage!!)
-            uiState.user == null -> Text("No se pudo cargar el perfil")
-            else -> {
-                val user = uiState.user!!
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = user.name.first().toString(), style = MaterialTheme.typography.headlineLarge)
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(user.name, style = MaterialTheme.typography.headlineMedium)
-                        Text(user.career, style = MaterialTheme.typography.bodyLarge)
-                        Text(user.email, style = MaterialTheme.typography.bodyMedium)
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Text("Habilidades", style = MaterialTheme.typography.titleLarge)
-                    }
-                    items(user.skills) { skill ->
-                        Text("${skill.name} - ${skill.level}")
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Button(onClick = { /* TODO: Implement add skill */ }) {
-                            Text("Añadir Habilidad")
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = {
-                            navController.navigate("landing") {
-                                popUpTo("home") { inclusive = true }
-                            }
-                        }) {
-                            Text("Cerrar Sesión")
-                        }
-                    }
+    val user = currentUser
+    if (user == null) {
+        // This should not happen if routes are protected, but as a fallback
+        navController.navigate("login") { popUpTo("home") { inclusive = true } }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        item {
+            Box(
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = user.name.first().toString(), style = MaterialTheme.typography.headlineLarge)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(user.name, style = MaterialTheme.typography.headlineMedium)
+            Text(user.career, style = MaterialTheme.typography.bodyLarge)
+            Text(user.email, style = MaterialTheme.typography.bodyMedium)
+        }
+        item {
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Habilidades", style = MaterialTheme.typography.titleLarge)
+        }
+        items(user.skills) { skill ->
+            Text("${skill.name} - ${skill.level}")
+        }
+        item {
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(onClick = { /* TODO: Implement add skill */ }) {
+                Text("Añadir Habilidad")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = {
+                authViewModel.logout()
+                navController.navigate("landing") {
+                    popUpTo("home") { inclusive = true }
                 }
+            }) {
+                Text("Cerrar Sesión")
             }
         }
     }
